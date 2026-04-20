@@ -1,298 +1,227 @@
+```html
 <!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>বাংলাদেশ নৌবাহিনী স্কুল এন্ড কলেজ - পরীক্ষার ড্যাশবোর্ড</title>
+    <title>পরীক্ষার ড্যাশবোর্ড - বি এন স্কুল এন্ড কলেজ</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Chosen Palette: Navy Blue, Slate Grays, Soft Amber Accents -->
-    <!-- Application Structure Plan: The SPA uses a dashboard structure to make the static exam routine dynamic and engaging. A hero section provides an immediate countdown to the next exam, reducing anxiety and improving preparedness. A chart visualizes the distribution of subjects, and an interactive, filterable table allows students to easily find specific exam dates. This layout prioritizes immediate needs (what's next?) while providing comprehensive details (full schedule). -->
-    <!-- Visualization & Content Choices: 
-         1. Next Exam Countdown -> Goal: Inform/Urgency -> Presentation: Dynamic Text -> Interaction: Real-time update -> Library: Vanilla JS. 
-         2. Subject Distribution -> Goal: Organize/Analyze -> Presentation: Doughnut Chart -> Interaction: Hover tooltips -> Library: Chart.js. 
-         3. Interactive Routine -> Goal: Explore -> Presentation: Data Table -> Interaction: Text Filtering/Search -> Library: Vanilla JS. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 350px;
+        body {
+            font-family: 'Noto Sans Bengali', sans-serif;
         }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 350px;
-            }
+
+        .active-mode {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            border: 2px solid #ef4444;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .exam-running-row {
+            background-color: #fef2f2 !important;
+            border-left: 4px solid #ef4444;
+        }
+        
+        .timer-unit-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+            padding: 1rem;
+            border-radius: 1rem;
+            min-width: 80px;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+<body class="bg-slate-50 text-slate-800 antialiased">
 
     <nav class="bg-blue-900 text-white shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center gap-3">
-                    <span class="text-2xl">🏫</span>
-                    <h1 class="font-bold text-lg md:text-xl tracking-wide">বিএন স্কুল এন্ড কলেজ, খুলনা</h1>
+                    <span class="text-2xl">⚓</span>
+                    <h1 class="font-bold text-lg md:text-xl">বি এন স্কুল এন্ড কলেজ, খুলনা</h1>
+                </div>
+                <div id="live-indicator" class="hidden items-center gap-2 bg-red-600 px-3 py-1 rounded-full animate-pulse">
+                    <span class="w-2 h-2 bg-white rounded-full"></span>
+                    <span class="text-xs font-bold uppercase tracking-tighter">Live Exam</span>
                 </div>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <main class="max-w-4xl mx-auto px-4 py-8 space-y-8">
         
-        <header class="text-center space-y-4 max-w-3xl mx-auto">
-            <h2 class="text-3xl md:text-4xl font-extrabold text-blue-900 drop-shadow-sm">১০ম শ্রেণির প্রস্তুতিমূলক পরীক্ষা - ২০২৬</h2>
-            <p class="text-lg text-slate-600 leading-relaxed">
-                এই ড্যাশবোর্ডটি আপনার আসন্ন পরীক্ষার সময়সূচিকে সহজে বিশ্লেষণ এবং ট্র্যাক করার জন্য তৈরি করা হয়েছে। এখানে আপনি আপনার পরবর্তী পরীক্ষার সময়, বিষয়ভিত্তিক বিভাজন এবং সম্পূর্ণ রুটিনটি খুব সহজেই খুঁজে পাবেন।
-            </p>
-        </header>
-
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div class="bg-white rounded-2xl shadow-md border border-slate-100 p-6 sm:p-8 flex flex-col justify-center items-center text-center transform transition duration-300 hover:shadow-lg">
-                <div class="text-blue-500 text-5xl mb-4">⏱️</div>
-                <h3 class="text-xl font-semibold text-slate-700 mb-2">পরবর্তী পরীক্ষা</h3>
-                <div id="next-exam-name" class="text-2xl font-bold text-blue-900 mb-4 h-8">লোড হচ্ছে...</div>
-                <div class="grid grid-cols-4 gap-2 sm:gap-4 w-full max-w-sm">
-                    <div class="bg-blue-50 rounded-lg p-2 sm:p-3">
-                        <div id="cd-days" class="text-2xl sm:text-3xl font-bold text-blue-700">00</div>
-                        <div class="text-xs sm:text-sm text-slate-500">দিন</div>
+        <!-- Main Countdown Card -->
+        <section id="main-timer-card" class="bg-blue-900 text-white rounded-3xl p-8 shadow-xl flex flex-col items-center text-center relative overflow-hidden transition-all duration-500">
+            <div class="relative z-10 w-full">
+                <p class="text-blue-200 text-sm font-medium tracking-wide mb-2" id="timer-label">পরবর্তী পরীক্ষা</p>
+                <h3 id="next-exam-name" class="text-3xl md:text-5xl font-bold mb-8">লোড হচ্ছে...</h3>
+                
+                <div id="countdown-grid" class="flex flex-wrap justify-center gap-4 md:gap-6">
+                    <div class="timer-unit-box">
+                        <div id="cd-days" class="text-3xl md:text-4xl font-bold">00</div>
+                        <span class="text-[10px] opacity-70 uppercase font-semibold">দিন</span>
                     </div>
-                    <div class="bg-blue-50 rounded-lg p-2 sm:p-3">
-                        <div id="cd-hours" class="text-2xl sm:text-3xl font-bold text-blue-700">00</div>
-                        <div class="text-xs sm:text-sm text-slate-500">ঘণ্টা</div>
+                    <div class="timer-unit-box">
+                        <div id="cd-hours" class="text-3xl md:text-4xl font-bold">00</div>
+                        <span class="text-[10px] opacity-70 uppercase font-semibold">ঘণ্টা</span>
                     </div>
-                    <div class="bg-blue-50 rounded-lg p-2 sm:p-3">
-                        <div id="cd-mins" class="text-2xl sm:text-3xl font-bold text-blue-700">00</div>
-                        <div class="text-xs sm:text-sm text-slate-500">মিনিট</div>
+                    <div class="timer-unit-box">
+                        <div id="cd-mins" class="text-3xl md:text-4xl font-bold">00</div>
+                        <span class="text-[10px] opacity-70 uppercase font-semibold">মিনিট</span>
                     </div>
-                    <div class="bg-blue-50 rounded-lg p-2 sm:p-3">
-                        <div id="cd-secs" class="text-2xl sm:text-3xl font-bold text-blue-700">00</div>
-                        <div class="text-xs sm:text-sm text-slate-500">সেকেন্ড</div>
+                    <div class="timer-unit-box bg-white text-blue-900">
+                        <div id="cd-secs" class="text-3xl md:text-4xl font-bold">00</div>
+                        <span class="text-[10px] opacity-70 uppercase font-semibold">সেকেন্ড</span>
                     </div>
                 </div>
-                <p id="next-exam-date" class="mt-6 text-slate-500 font-medium"></p>
+                <p id="exam-status-desc" class="mt-8 text-blue-100 font-medium opacity-90"></p>
             </div>
-
-            <div class="bg-white rounded-2xl shadow-md border border-slate-100 p-6 sm:p-8 flex flex-col items-center">
-                <h3 class="text-xl font-semibold text-slate-700 mb-4 w-full text-left">বিষয়ভিত্তিক বিভাজন</h3>
-                <p class="text-sm text-slate-500 mb-4 w-full text-left">পরীক্ষার বিষয়গুলোকে ৩টি প্রধান ভাগে ভাগ করা হয়েছে।</p>
-                <div class="chart-container flex-grow w-full">
-                    <canvas id="subjectChart"></canvas>
-                </div>
-            </div>
+            <!-- Decorative Background Element -->
+            <div class="absolute right-[-20px] bottom-[-20px] opacity-5 text-9xl pointer-events-none select-none">⚓</div>
         </section>
 
-        <section class="bg-white rounded-2xl shadow-md border border-slate-100 overflow-hidden">
-            <div class="p-6 border-b border-slate-100 bg-slate-50 flex flex-col sm:flex-row justify-between items-center gap-4">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-800">সম্পূর্ণ সময়সূচি</h3>
-                    <p class="text-sm text-slate-500">যে কোনো বিষয় খুঁজতে নিচের বক্সে টাইপ করুন</p>
-                </div>
-                <div class="relative w-full sm:w-64">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">🔍</span>
-                    <input type="text" id="searchInput" placeholder="বিষয় বা তারিখ খুঁজুন..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow">
+        <!-- Routine Table Section -->
+        <section class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="p-6 bg-slate-50 border-b border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                <h3 class="font-bold text-xl text-slate-800">পরীক্ষার সময়সূচি ২০২৬</h3>
+                <div class="relative w-full md:w-72">
+                    <input type="text" id="searchInput" placeholder="বিষয় দিয়ে সার্চ করুন..." class="w-full px-5 py-2.5 rounded-2xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition-shadow text-sm">
                 </div>
             </div>
             
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-100 text-slate-600 uppercase text-sm leading-normal border-b border-slate-200">
-                            <th class="py-3 px-6 font-semibold">তারিখ</th>
-                            <th class="py-3 px-6 font-semibold">বার</th>
-                            <th class="py-3 px-6 font-semibold">বিষয়</th>
-                            <th class="py-3 px-6 font-semibold text-center">অবস্থা</th>
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 text-slate-500 text-[11px] uppercase font-bold border-b border-slate-100">
+                        <tr>
+                            <th class="py-5 px-8">তারিখ ও বার</th>
+                            <th class="py-5 px-8">পরীক্ষার বিষয়</th>
+                            <th class="py-5 px-8 text-center">অবস্থা</th>
                         </tr>
                     </thead>
-                    <tbody id="routineTableBody" class="text-slate-700 text-sm">
+                    <tbody id="routineTableBody" class="divide-y divide-slate-100">
+                        <!-- Content generated by JS -->
                     </tbody>
                 </table>
-            </div>
-            <div id="noResults" class="hidden p-8 text-center text-slate-500">
-                কোনো ফলাফল পাওয়া যায়নি।
             </div>
         </section>
 
     </main>
 
-    <footer class="bg-slate-900 text-slate-400 py-6 text-center text-sm mt-12">
-        <p>পরীক্ষার প্রস্তুতির জন্য শুভকামনা রইল।</p>
-        <p class="mt-2">© ২০২৬ বাংলাদেশ নৌবাহিনী স্কুল এন্ড কলেজ, খুলনা</p>
+    <footer class="py-12 text-center text-slate-400 text-sm">
+        <p>© ২০২৬ বাংলাদেশ নৌবাহিনী স্কুল এন্ড কলেজ, খুলনা</p>
+        <p class="mt-1 font-light italic">১০ম শ্রেণি প্রস্তুতিমূলক পরীক্ষা</p>
     </footer>
 
     <script>
         const routineData = [
-            { dateStr: '২৩/০৪/২৬', day: 'বৃহস্পতিবার', subject: 'বাংলা-০১', category: 'ভাষা', dateObj: new Date(2026, 3, 23, 10, 0, 0) },
-            { dateStr: '২৬/০৪/২৬', day: 'রবিবার', subject: 'বাংলা-০২', category: 'ভাষা', dateObj: new Date(2026, 3, 26, 10, 0, 0) },
-            { dateStr: '২৮/০৪/২৬', day: 'মঙ্গলবার', subject: 'ইংরেজি-০১', category: 'ভাষা', dateObj: new Date(2026, 3, 28, 10, 0, 0) },
-            { dateStr: '৩০/০৪/২৬', day: 'বৃহস্পতিবার', subject: 'ইংরেজি-০২', category: 'ভাষা', dateObj: new Date(2026, 3, 30, 10, 0, 0) },
-            { dateStr: '০৩/০৫/২৬', day: 'রবিবার', subject: 'গণিত', category: 'সাধারণ', dateObj: new Date(2026, 4, 3, 10, 0, 0) },
-            { dateStr: '০৫/০৫/২৬', day: 'মঙ্গলবার', subject: 'জীব/ব্যঃ উঃ/ইতিহাস', category: 'বিভাগীয়', dateObj: new Date(2026, 4, 5, 10, 0, 0) },
-            { dateStr: '০৭/০৫/২৬', day: 'বৃহস্পতিবার', subject: 'রসায়ন/হিসাব/ভূগোল', category: 'বিভাগীয়', dateObj: new Date(2026, 4, 7, 10, 0, 0) },
-            { dateStr: '১০/০৫/২৬', day: 'রবিবার', subject: 'পদার্থ/ফিন্যান্স/পৌরনীতি', category: 'বিভাগীয়', dateObj: new Date(2026, 4, 10, 10, 0, 0) },
-            { dateStr: '১১/০৫/২৬', day: 'সোমবার', subject: 'ধর্ম', category: 'সাধারণ', dateObj: new Date(2026, 4, 11, 10, 0, 0) },
-            { dateStr: '১২/০৫/২৬', day: 'মঙ্গলবার', subject: 'বাঃ ও বিশ্বঃ', category: 'সাধারণ', dateObj: new Date(2026, 4, 12, 10, 0, 0) },
-            { dateStr: '১৩/০৫/২৬', day: 'বুধবার', subject: 'আইসিটি', category: 'সাধারণ', dateObj: new Date(2026, 4, 13, 10, 0, 0) },
-            { dateStr: '১৪/০৫/২৬', day: 'বৃহস্পতিবার', subject: 'উঃ গণিত/কৃষি', category: 'বিভাগীয়', dateObj: new Date(2026, 4, 14, 10, 0, 0) }
+            { date: '২৩/০৪/২৬', day: 'বৃহস্পতিবার', subject: 'বাংলা-০১', s: new Date(2026,3,23,14,0), e: new Date(2026,3,23,15,30) },
+            { date: '২৬/০৪/২৬', day: 'রবিবার', subject: 'বাংলা-০২', s: new Date(2026,3,26,14,0), e: new Date(2026,3,26,15,30) },
+            { date: '২৮/০৪/২৬', day: 'মঙ্গলবার', subject: 'ইংরেজি-০১', s: new Date(2026,3,28,14,0), e: new Date(2026,3,28,15,30) },
+            { date: '৩০/০৪/২৬', day: 'বৃহস্পতিবার', subject: 'ইংরেজি-০২', s: new Date(2026,3,30,14,0), e: new Date(2026,3,30,15,30) },
+            { date: '০৩/০৫/২৬', day: 'রবিবার', subject: 'গণিত', s: new Date(2026,4,3,14,0), e: new Date(2026,4,3,15,30) },
+            { date: '০৫/০৫/২৬', day: 'মঙ্গলবার', subject: 'জীব / ব্যঃ উঃ / ইতিহাস', s: new Date(2026,4,5,14,0), e: new Date(2026,4,5,15,30) },
+            { date: '০৭/০৫/২৬', day: 'বৃহস্পতিবার', subject: 'রসায়ন / হিসাব / ভূগোল', s: new Date(2026,4,7,14,0), e: new Date(2026,4,7,15,30) },
+            { date: '১০/০৫/২৬', day: 'রবিবার', subject: 'পদার্থ / ফিন্যান্স / পৌরনীতি', s: new Date(2026,4,10,14,0), e: new Date(2026,4,10,15,30) },
+            { date: '১১/০৫/২৬', day: 'সোমবার', subject: 'ধর্ম', s: new Date(2026,4,11,14,0), e: new Date(2026,4,11,15,30) },
+            { date: '১২/০৫/২৬', day: 'মঙ্গলবার', subject: 'বাংলাদেশ ও বিশ্বপরিচয়', s: new Date(2026,4,12,14,0), e: new Date(2026,4,12,15,30) },
+            { date: '১৩/০৫/২৬', day: 'বুধবার', subject: 'আইসিটি', s: new Date(2026,4,13,14,0), e: new Date(2026,4,13,15,30) },
+            { date: '১৪/০৫/২৬', day: 'বৃহস্পতিবার', subject: 'উঃ গণিত / কৃষি', s: new Date(2026,4,14,14,0), e: new Date(2026,4,14,15,30) }
         ];
-
-        let nextExamIndex = -1;
-
-        function initializeApp() {
-            renderTable(routineData);
-            setupSearch();
-            setupCountdown();
-            initChart();
-        }
 
         function renderTable(data) {
             const tbody = document.getElementById('routineTableBody');
-            const noResults = document.getElementById('noResults');
             tbody.innerHTML = '';
-            
             const now = new Date();
+            let foundNext = false;
 
-            if (data.length === 0) {
-                noResults.classList.remove('hidden');
+            data.forEach(item => {
+                let status = '<span class="text-slate-300 font-medium">আসন্ন</span>';
+                let rowStyle = "";
+
+                if (now > item.e) {
+                    status = '<span class="text-emerald-500 font-bold text-xs flex items-center justify-center gap-1">✓ সম্পন্ন</span>';
+                } else if (now >= item.s && now <= item.e) {
+                    status = '<span class="bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase animate-pulse">Running</span>';
+                    rowStyle = "exam-running-row";
+                } else if (!foundNext && now < item.s) {
+                    status = '<span class="text-blue-600 font-bold text-xs">পরবর্তী</span>';
+                    rowStyle = "bg-blue-50/50";
+                    foundNext = true;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="${rowStyle} transition-all duration-300 hover:bg-slate-50/50">
+                        <td class="py-5 px-8">
+                            <div class="font-bold text-slate-700">${item.date}</div>
+                            <div class="text-[10px] text-slate-400 mt-1">${item.day}</div>
+                        </td>
+                        <td class="py-5 px-8 font-bold text-blue-900">${item.subject}</td>
+                        <td class="py-5 px-8 text-center">${status}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateCountdown() {
+            const now = new Date();
+            const timerCard = document.getElementById('main-timer-card');
+            const liveBadge = document.getElementById('live-indicator');
+            
+            let current = routineData.find(e => now >= e.s && now <= e.e);
+            let next = routineData.find(e => now < e.s);
+            let target = current ? current.e : (next ? next.s : null);
+
+            if (current) {
+                timerCard.className = "bg-red-600 text-white rounded-3xl p-8 shadow-2xl flex flex-col items-center text-center relative overflow-hidden active-mode";
+                document.getElementById('timer-label').textContent = "পরীক্ষা বর্তমানে চলছে";
+                document.getElementById('next-exam-name').textContent = current.subject;
+                document.getElementById('exam-status-desc').textContent = "সময় শেষ হতে আর বাকি...";
+                liveBadge.classList.remove('hidden');
+                liveBadge.classList.add('flex');
+            } else if (next) {
+                timerCard.className = "bg-blue-900 text-white rounded-3xl p-8 shadow-xl flex flex-col items-center text-center relative overflow-hidden transition-all duration-500";
+                document.getElementById('timer-label').textContent = "পরবর্তী পরীক্ষা";
+                document.getElementById('next-exam-name').textContent = next.subject;
+                document.getElementById('exam-status-desc').textContent = `${next.date} — ${next.day}`;
+                liveBadge.classList.add('hidden');
             } else {
-                noResults.classList.add('hidden');
-                data.forEach((item, index) => {
-                    let statusHtml = '';
-                    let rowClass = 'border-b border-slate-100 hover:bg-slate-50 transition-colors';
-                    
-                    if (item.dateObj < now) {
-                        statusHtml = '<span class="bg-green-100 text-green-700 py-1 px-3 rounded-full text-xs font-semibold">সম্পন্ন</span>';
-                    } else if (nextExamIndex === -1 && item.dateObj > now) {
-                        statusHtml = '<span class="bg-blue-100 text-blue-700 py-1 px-3 rounded-full text-xs font-semibold animate-pulse">পরবর্তী</span>';
-                        rowClass = 'border-b border-blue-200 bg-blue-50/50 hover:bg-blue-50 transition-colors';
-                        nextExamIndex = index;
-                    } else {
-                        statusHtml = '<span class="bg-slate-100 text-slate-500 py-1 px-3 rounded-full text-xs font-semibold">আসন্ন</span>';
-                    }
+                document.getElementById('timer-label').textContent = "সবগুলো পরীক্ষা শেষ";
+                document.getElementById('next-exam-name').textContent = "অভিনন্দন ও শুভকামনা!";
+                document.getElementById('exam-status-desc').textContent = "আপনি সকল পরীক্ষা সম্পন্ন করেছেন।";
+                liveBadge.classList.add('hidden');
+            }
 
-                    const tr = document.createElement('tr');
-                    tr.className = rowClass;
-                    tr.innerHTML = `
-                        <td class="py-3 px-6 whitespace-nowrap font-medium text-slate-800">📅 ${item.dateStr}</td>
-                        <td class="py-3 px-6">${item.day}</td>
-                        <td class="py-3 px-6 font-bold text-blue-900">${item.subject}</td>
-                        <td class="py-3 px-6 text-center">${statusHtml}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+            if (target) {
+                const diff = target - now;
+                document.getElementById('cd-days').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
+                document.getElementById('cd-hours').textContent = String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+                document.getElementById('cd-mins').textContent = String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+                document.getElementById('cd-secs').textContent = String(Math.floor((diff%60000)/1000)).padStart(2,'0');
             }
         }
 
-        function setupSearch() {
-            const searchInput = document.getElementById('searchInput');
-            searchInput.addEventListener('input', (e) => {
-                const term = e.target.value.toLowerCase();
-                const filteredData = routineData.filter(item => 
-                    item.subject.toLowerCase().includes(term) || 
-                    item.dateStr.includes(term) ||
-                    item.day.includes(term)
-                );
-                nextExamIndex = -1; 
-                renderTable(filteredData);
-            });
-        }
+        document.getElementById('searchInput').oninput = (e) => {
+            const val = e.target.value.toLowerCase();
+            renderTable(routineData.filter(i => i.subject.toLowerCase().includes(val)));
+        };
 
-        function setupCountdown() {
-            const now = new Date();
-            let targetExam = routineData.find(exam => exam.dateObj > now);
-            
-            if (!targetExam) {
-                targetExam = routineData[routineData.length - 1]; 
-                document.getElementById('next-exam-name').textContent = "পরীক্ষা শেষ!";
-                document.getElementById('next-exam-date').textContent = "সবগুলো পরীক্ষা সফলভাবে সম্পন্ন হয়েছে।";
-                return;
-            }
-
-            document.getElementById('next-exam-name').textContent = targetExam.subject;
-            document.getElementById('next-exam-date').textContent = `${targetExam.dateStr} (${targetExam.day})`;
-
-            function updateTimer() {
-                const currentTime = new Date().getTime();
-                const distance = targetExam.dateObj.getTime() - currentTime;
-
-                if (distance < 0) {
-                    setupCountdown(); 
-                    nextExamIndex = -1;
-                    renderTable(routineData);
-                    return;
-                }
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
-                document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
-                document.getElementById('cd-mins').textContent = String(minutes).padStart(2, '0');
-                document.getElementById('cd-secs').textContent = String(seconds).padStart(2, '0');
-            }
-
-            updateTimer();
-            setInterval(updateTimer, 1000);
-        }
-
-        function initChart() {
-            const categories = {};
-            routineData.forEach(item => {
-                categories[item.category] = (categories[item.category] || 0) + 1;
-            });
-
-            const ctx = document.getElementById('subjectChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(categories),
-                    datasets: [{
-                        data: Object.values(categories),
-                        backgroundColor: [
-                            '#3b82f6', 
-                            '#f59e0b', 
-                            '#10b981'  
-                        ],
-                        borderWidth: 0,
-                        hoverOffset: 4
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: {
-                                    family: 'sans-serif'
-                                },
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.label + ': ' + context.parsed + ' টি পরীক্ষা';
-                                }
-                            }
-                        }
-                    },
-                    cutout: '65%'
-                }
-            });
-        }
-
-        window.addEventListener('DOMContentLoaded', initializeApp);
-
+        window.onload = () => {
+            renderTable(routineData);
+            setInterval(() => {
+                updateCountdown();
+                if (new Date().getSeconds() === 0) renderTable(routineData);
+            }, 1000);
+            updateCountdown();
+        };
     </script>
 </body>
 </html>
